@@ -14,12 +14,15 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
         // Create videos table if it doesn't exist
         db.run(`CREATE TABLE IF NOT EXISTS videos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT NOT NULL,
+            fileName TEXT NOT NULL,
+            filePath TEXT NOT NULL,
+            mimeType TEXT NOT NULL,
             size INTEGER NOT NULL,
             duration INTEGER NOT NULL,
+            encoding TEXT NOT NULL,
             status TEXT DEFAULT '${VIDEO_STATUS.ACTIVE}',
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )`, (err) => {
             if (err) {
                 console.error('Error creating table ' + err.message);
