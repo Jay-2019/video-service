@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { uploadVideo } = require('../controllers/video.controller');
+const { uploadVideo, trimVideoClip } = require('../controllers/video.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const path = require('path');
 const fs = require('fs');
@@ -39,5 +39,7 @@ const upload = multer({
 
 
 router.post('/upload', authenticate, upload.single('video'), uploadVideo);
+
+router.post('/trim', authenticate, trimVideoClip);
 
 module.exports = router;

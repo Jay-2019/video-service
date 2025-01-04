@@ -1,7 +1,10 @@
 const { Video } = require('../models');
+const path = require('path');
+const fs = require('fs');
 const handleError = require('../utils/errorHandler');
 const { ERROR_MESSAGES, SUCCESS_MESSAGES, HTTP_STATUS_CODE, VIDEO_STATUS } = require('../constants/constants');
 const { getVideoDuration, validateVideoDuration, validateVideoSize } = require('../utils/fileUtils');
+const { trimVideo } = require('../services/video.service');
 
 const uploadVideo = async (req, res) => {
     try {
@@ -34,6 +37,55 @@ const uploadVideo = async (req, res) => {
     }
 };
 
+const trimVideoClip = async (req, res) => {
+    try {
+        const { videoId, startTime, endTime } = req.body;
+
+        if (!videoId || startTime === undefined || endTime === undefined) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({ error: 'videoId, startTime, and endTime are required fields.' });
+        }
+
+        if (isNaN(Number(startTime)) || isNaN(Number(endTime))) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({ error: 'startTime and endTime must be valid numbers.' });
+        }
+
+        const video = await Video.findOne({ where: { id: videoId } });
+        if (!video) {
+            return res.status(HTTP_STATUS_CODE.NOT_FOUND).json({ error: ERROR_MESSAGES.VIDEO_NOT_FOUND });
+        }
+
+        if (startTime >= endTime || startTime < 0 || endTime > video.duration) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({ error: `startTime must be less than endTime. | startTime must be greater than or equal to 0. |  endTime must be less than or equal to the video duration (${video.duration} seconds).` });
+        }
+
+        const trimmedDuration = endTime - startTime;
+        const minimumVideoDuration = process.env.MIN_VIDEO_DURATION;
+        if (trimmedDuration < minimumVideoDuration) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({ error: `Trimmed duration (${trimmedDuration} seconds) is less than the minimum allowed duration (${minimumVideoDuration} seconds).` });
+        }
+
+        const outputPath = path.join(__dirname, '../../assets/videos', `trimmed-${Date.now()}-${video.fileName}`);
+        await trimVideo(video.filePath, startTime, endTime, outputPath);
+
+        const newDuration = await getVideoDuration(outputPath);
+        const newSize = fs.statSync(outputPath).size;
+
+        const trimmedVideo = await Video.create({
+            fileName: path.basename(outputPath),
+            filePath: outputPath,
+            mimeType: video.mimeType,
+            size: newSize,
+            duration: newDuration,
+            encoding: video.encoding,
+            status: VIDEO_STATUS.ACTIVE
+        });
+
+        return res.status(HTTP_STATUS_CODE.OK).json({ message: SUCCESS_MESSAGES.VIDEO_TRIMMED, video: trimmedVideo });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
 const validateVideo = (file, duration) => {
     const errors = [];
 
@@ -49,5 +101,6 @@ const validateVideo = (file, duration) => {
 };
 
 module.exports = {
-    uploadVideo
+    uploadVideo,
+    trimVideoClip
 };

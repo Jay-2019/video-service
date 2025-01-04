@@ -17,10 +17,12 @@ const ERROR_MESSAGES = {
   VIDEO_NOT_FOUND: "Video not found.",
   INVALID_REQUEST: "Invalid request parameters.",
   INVALID_FILE_TYPE: "Invalid file type. Only video files are allowed.",
+  VIDEO_NOT_FOUND: "Video not found.",
 };
 
 const SUCCESS_MESSAGES = {
   VIDEO_UPLOADED: "Video uploaded successfully.",
+  VIDEO_TRIMMED: "Video trimmed successfully.",
 };
 
 
