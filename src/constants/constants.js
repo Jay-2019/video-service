@@ -16,9 +16,11 @@ const ERROR_MESSAGES = {
   SHARE_LINK_EXPIRED: "The share link has expired.",
   VIDEO_NOT_FOUND: "Video not found.",
   INVALID_REQUEST: "Invalid request parameters.",
+  INVALID_FILE_TYPE: "Invalid file type. Only video files are allowed.",
 };
 
 const SUCCESS_MESSAGES = {
+  VIDEO_UPLOADED: "Video uploaded successfully.",
 };
 
 
