@@ -40,16 +40,44 @@ const uploadVideo = async (req, res) => {
     }
 };
 
+const validateTrimRequest = (videoId, startTime, endTime) => {
+    if (!videoId) {
+        return { valid: false, error: ERROR_MESSAGES.VIDEO_ID_REQUIRED };
+    }
+
+    if (!startTime && !endTime) {
+        return { valid: false, error: ERROR_MESSAGES.START_OR_END_TIME_REQUIRED };
+    }
+
+    if (startTime && isNaN(Number(startTime))) {
+        return { valid: false, error: ERROR_MESSAGES.INVALID_START_TIME };
+    }
+
+    if (endTime && isNaN(Number(endTime))) {
+        return { valid: false, error: ERROR_MESSAGES.INVALID_END_TIME };
+    }
+
+    return { valid: true };
+};
+
+const getTrimTimes = (startTime, endTime, videoDuration) => {
+    let start = startTime ? Number(startTime) : 0;
+    let end = endTime ? Number(endTime) : videoDuration;
+
+    if (start >= end || start < 0 || end > videoDuration) {
+        throw new Error(`startTime must be less than endTime. | startTime must be greater than or equal to 0. | endTime must be less than or equal to the video duration (${videoDuration} seconds).`);
+    }
+
+    return { start, end };
+};
+
 const trimVideoClip = async (req, res) => {
     try {
         const { videoId, startTime, endTime } = req.body;
 
-        if (!videoId || startTime === undefined || endTime === undefined) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({ error: 'videoId, startTime, and endTime are required fields.' });
-        }
-
-        if (isNaN(Number(startTime)) || isNaN(Number(endTime))) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({ error: 'startTime and endTime must be valid numbers.' });
+        const validation = validateTrimRequest(videoId, startTime, endTime);
+        if (!validation.valid) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({ error: validation.error });
         }
 
         const video = await Video.findOne({ where: { id: videoId } });
@@ -57,18 +85,10 @@ const trimVideoClip = async (req, res) => {
             return res.status(HTTP_STATUS_CODE.NOT_FOUND).json({ error: ERROR_MESSAGES.VIDEO_NOT_FOUND });
         }
 
-        if (startTime >= endTime || startTime < 0 || endTime > video.duration) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({ error: `startTime must be less than endTime. | startTime must be greater than or equal to 0. |  endTime must be less than or equal to the video duration (${video.duration} seconds).` });
-        }
-
-        const trimmedDuration = endTime - startTime;
-        const minimumVideoDuration = process.env.MIN_VIDEO_DURATION;
-        if (trimmedDuration < minimumVideoDuration) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({ error: `Trimmed duration (${trimmedDuration} seconds) is less than the minimum allowed duration (${minimumVideoDuration} seconds).` });
-        }
+        const { start, end } = getTrimTimes(startTime, endTime, video.duration);
 
         const outputPath = path.join(__dirname, '../../assets/videos', `trimmed-${Date.now()}-${video.fileName}`);
-        await trimVideo(video.filePath, startTime, endTime, outputPath);
+        await trimVideo(video.filePath, start, end, outputPath);
 
         const newDuration = await getVideoDuration(outputPath);
         const newSize = fs.statSync(outputPath).size;
@@ -88,6 +108,7 @@ const trimVideoClip = async (req, res) => {
         handleError(res, error);
     }
 };
+
 
 const mergeVideoClips = async (req, res) => {
     try {

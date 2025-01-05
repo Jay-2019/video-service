@@ -23,7 +23,11 @@ const ERROR_MESSAGES = {
   OUTPUT_FILE_NAME_REQUIRED: "outputFileName is required.",
   INPUT_FILE_NOT_FOUND: "Input video file not found",
   MERGE_FILE_ERROR: "Failed to create merged video file",
-  MINIMUM_VIDEO_IDS_REQUIRED: "At least two video IDs are required to merge."
+  MINIMUM_VIDEO_IDS_REQUIRED: "At least two video IDs are required to merge.",
+  VIDEO_ID_REQUIRED: "videoId is a required field.",
+  START_OR_END_TIME_REQUIRED: "At least one of startTime or endTime must be provided.",
+  INVALID_START_TIME: "startTime must be a valid number.",
+  INVALID_END_TIME: "endTime must be a valid number.",
 };
 
 const SUCCESS_MESSAGES = {
