@@ -214,9 +214,30 @@ const validateVideo = (file, duration) => {
     return errors;
 };
 
+const accessShareableLink = async (req, res) => {
+    try {
+        const { linkId } = req.params;
+        const videoId = await redisClient.get(linkId);
+  
+        if (!videoId) {
+            return res.status(HTTP_STATUS_CODE.NOT_FOUND).json({ error: ERROR_MESSAGES.SHARE_LINK_EXPIRED });
+        }
+  
+        const video = await Video.findOne({ where: { id: videoId } });
+        if (!video) {
+            return res.status(HTTP_STATUS_CODE.NOT_FOUND).json({ error: ERROR_MESSAGES.VIDEO_NOT_FOUND });
+        }
+  
+        return res.status(HTTP_STATUS_CODE.OK).json({ video });
+    } catch (error) {
+        handleError(res, error);
+    }
+  };
+
 module.exports = {
     uploadVideo,
     trimVideoClip,
     mergeVideoClips,
-    generateShareableLink
+    generateShareableLink,
+    accessShareableLink
 };

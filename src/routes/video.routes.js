@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { uploadVideo, trimVideoClip, mergeVideoClips, generateShareableLink } = require('../controllers/video.controller');
+const { uploadVideo, trimVideoClip, mergeVideoClips, generateShareableLink, accessShareableLink } = require('../controllers/video.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const path = require('path');
 const fs = require('fs');
@@ -45,5 +45,7 @@ router.post('/trim', authenticate, trimVideoClip);
 router.post("/merge", authenticate, mergeVideoClips);
 
 router.post('/share/:videoId', authenticate, generateShareableLink);
+
+router.get('/share/:linkId', accessShareableLink);
 
 module.exports = router;
