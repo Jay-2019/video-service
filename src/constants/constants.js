@@ -16,6 +16,7 @@ const ERROR_MESSAGES = {
   SHARE_LINK_EXPIRED: "The share link has expired.",
   VIDEO_NOT_FOUND: "Video not found.",
   INVALID_REQUEST: "Invalid request parameters.",
+  INTERNAL_SERVER_ERROR: "Internal server error.",
   INVALID_FILE_TYPE: "Invalid file type. Only video files are allowed.",
   ONE_OR_MORE_VIDEO_NOT_FOUND: "One or more videos not found.",
   INVALID_VIDEO_IDS: "videoIds must be a non-empty array.",
@@ -23,20 +24,19 @@ const ERROR_MESSAGES = {
   INPUT_FILE_NOT_FOUND: "Input video file not found",
   MERGE_FILE_ERROR: "Failed to create merged video file",
   MINIMUM_VIDEO_IDS_REQUIRED: "At least two video IDs are required to merge."
-
 };
 
 const SUCCESS_MESSAGES = {
   VIDEO_UPLOADED: "Video uploaded successfully.",
   VIDEO_TRIMMED: "Video trimmed successfully.",
+  VIDEO_MERGED: "Videos merged successfully.",
+  SHARE_LINK_CREATED: "Shareable link created successfully."
 };
-
 
 const VIDEO_STATUS = {
   ACTIVE: "active",
   INACTIVE: "inactive",
 };
-
 
 module.exports = {
   HTTP_STATUS_CODE,

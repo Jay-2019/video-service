@@ -1,10 +1,13 @@
-const { Video } = require('../models');
+const { Video, ShareableLink } = require('../models');
 const path = require('path');
 const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
+const redisClient = require('../redis/connection');
 const handleError = require('../utils/errorHandler');
 const { ERROR_MESSAGES, SUCCESS_MESSAGES, HTTP_STATUS_CODE, VIDEO_STATUS } = require('../constants/constants');
 const { getVideoDuration, validateVideoDuration, validateVideoSize } = require('../utils/fileUtils');
 const { trimVideo, mergeVideos } = require('../services/video.service');
+const {SHAREABLE_LINK_TTL}  = process.env;
 
 const uploadVideo = async (req, res) => {
     try {
@@ -154,6 +157,28 @@ const mergeVideoClips = async (req, res) => {
     }
 };
 
+const generateShareableLink = async (req, res) => {
+    try {
+        const { videoId } = req.params;
+
+        const video = await Video.findOne({ where: { id: videoId } });
+        if (!video) {
+            return res.status(HTTP_STATUS_CODE.NOT_FOUND).json({ error: ERROR_MESSAGES.VIDEO_NOT_FOUND });
+        }
+
+        const linkId = uuidv4();
+        const shareableLink = `${req.protocol}://${req.get('host')}/api/videos/share/${linkId}`;
+
+        await redisClient.set(linkId, videoId, { EX: SHAREABLE_LINK_TTL });
+
+        await ShareableLink.create({ linkId, videoId, ttl: SHAREABLE_LINK_TTL });
+
+        return res.status(HTTP_STATUS_CODE.OK).json({ message: SUCCESS_MESSAGES.SHARE_LINK_CREATED, link: shareableLink });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
 const validateVideo = (file, duration) => {
     const errors = [];
 
@@ -171,5 +196,6 @@ const validateVideo = (file, duration) => {
 module.exports = {
     uploadVideo,
     trimVideoClip,
-    mergeVideoClips
+    mergeVideoClips,
+    generateShareableLink
 };

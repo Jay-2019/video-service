@@ -1,4 +1,4 @@
-const { HTTP_STATUS_CODE } = require("../constants/constants");
+const { HTTP_STATUS_CODE, ERROR_MESSAGES } = require("../constants/constants");
 
 const handleError = (res, err) => {
     const statusCode = err.statusCode || HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR;
