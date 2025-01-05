@@ -1,4 +1,3 @@
-const { ERROR } = require("sqlite3");
 const { HTTP_STATUS_CODE } = require("../constants/constants");
 
 const handleError = (res, err) => {

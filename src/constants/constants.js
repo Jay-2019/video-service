@@ -17,7 +17,13 @@ const ERROR_MESSAGES = {
   VIDEO_NOT_FOUND: "Video not found.",
   INVALID_REQUEST: "Invalid request parameters.",
   INVALID_FILE_TYPE: "Invalid file type. Only video files are allowed.",
-  VIDEO_NOT_FOUND: "Video not found.",
+  ONE_OR_MORE_VIDEO_NOT_FOUND: "One or more videos not found.",
+  INVALID_VIDEO_IDS: "videoIds must be a non-empty array.",
+  OUTPUT_FILE_NAME_REQUIRED: "outputFileName is required.",
+  INPUT_FILE_NOT_FOUND: "Input video file not found",
+  MERGE_FILE_ERROR: "Failed to create merged video file",
+  MINIMUM_VIDEO_IDS_REQUIRED: "At least two video IDs are required to merge."
+
 };
 
 const SUCCESS_MESSAGES = {
