@@ -4,6 +4,8 @@ const { sequelize } = require('./src/models');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 require('./src/database/database');
+require('./src/redis/connection');
+
 const videoRoutes = require('./src/routes/video.routes');
 const errorHandler = require('./src/utils/errorHandler');
 
