@@ -28,6 +28,7 @@ const ERROR_MESSAGES = {
   START_OR_END_TIME_REQUIRED: "At least one of startTime or endTime must be provided.",
   INVALID_START_TIME: "startTime must be a valid number.",
   INVALID_END_TIME: "endTime must be a valid number.",
+  FILE_REQUIRED: "A video file is required.",
 };
 
 const SUCCESS_MESSAGES = {
