@@ -1,0 +1,272 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "API for managing video files including upload, trim, merge, and share functionalities.",
+    "version": "1.0.0",
+    "title": "Video File Management API"
+  },
+  "host": "localhost:3000",
+  "basePath": "/api",
+  "schemes": [
+    "http"
+  ],
+  "consumes": ["application/json", "multipart/form-data"],
+  "produces": ["application/json"],
+  "paths": {
+    "/ping": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Ping the server",
+        "description": "Returns a pong message to check if the server is running.",
+        "responses": {
+          "200": {
+            "description": "Server is running",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "pong"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/videos/upload": {
+      "post": {
+        "summary": "Upload a video",
+        "description": "Allows users to upload a video file with size and duration limits.",
+        "consumes": ["multipart/form-data"],
+        "parameters": [
+          {
+            "name": "video",
+            "in": "formData",
+            "required": true,
+            "type": "file",
+            "description": "Video file to upload"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video uploaded successfully"
+          }
+        }
+      }
+    },
+    "/videos/trim": {
+      "post": {
+        "summary": "Trim a video",
+        "description": "Shortens a previously uploaded video from the start or end.",
+        "consumes": ["application/x-www-form-urlencoded"],
+        "parameters": [
+          {
+            "name": "videoId",
+            "in": "formData",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "startTime",
+            "in": "formData",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "endTime",
+            "in": "formData",
+            "required": false,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video trimmed successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters"
+          },
+          "404": {
+            "description": "Video not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/videos/merge": {
+      "post": {
+        "summary": "Merge video clips",
+        "description": "Stitches multiple video clips into a single video file.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["videoIds", "outputFileName"],
+              "properties": {
+                "videoIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  },
+                  "example": [1, 2],
+                  "description": "Array of video IDs to merge"
+                },
+                "outputFileName": {
+                  "type": "string",
+                  "example": "merged-video",
+                  "description": "Name for the merged output file"
+                }
+              }
+            },
+            "examples": {
+              "application/json": {
+                "videoIds": [1, 2],
+                "outputFileName": "memeoncricket"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Videos merged successfully"
+          },
+          "400": {
+            "description": "Invalid request parameters"
+          },
+          "404": {
+            "description": "One or more videos not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/videos/share/{videoId}": {
+      "post": {
+        "summary": "Generate shareable link",
+        "description": "Generates a shareable link for a video with a time-based expiry.",
+        "parameters": [
+          {
+            "name": "videoId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the video to share"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shareable link generated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Share link created successfully"
+                },
+                "link": {
+                  "type": "string",
+                  "example": "http://localhost:3000/api/videos/share/550e8400-e29b-41d4-a716-446655440000"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Video not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/videos/share/{linkId}": {
+      "get": {
+        "summary": "Access shared video",
+        "description": "Access a video using a shareable link.",
+        "parameters": [
+          {
+            "name": "linkId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Unique identifier for the shared link"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video accessed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "video": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "fileName": {
+                      "type": "string",
+                      "example": "video.mp4"
+                    },
+                    "filePath": {
+                      "type": "string",
+                      "example": "/assets/videos/video.mp4"
+                    },
+                    "mimeType": {
+                      "type": "string",
+                      "example": "video/mp4"
+                    },
+                    "size": {
+                      "type": "integer",
+                      "example": 1024000
+                    },
+                    "duration": {
+                      "type": "number",
+                      "example": 15.5
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "ACTIVE"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Shareable link expired or video not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ]
+}
